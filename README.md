@@ -11,6 +11,7 @@ Plataforma aberta para análise auditável de debates, entrevistas e declaraçõ
 - PostgreSQL 16
 - Redis 7 + Celery
 - Pesquisa demo local e integração opcional com Brave Search
+- LLM via endpoint OpenAI-compatible, com fallback demo determinístico
 - Docker Compose + GitHub Actions
 
 ## Rodar localmente
@@ -37,16 +38,26 @@ Acesse:
 
 `SEARCH_PROVIDER=demo` permite executar o pipeline sem credenciais externas. Ele demonstra o fluxo técnico com fontes e conteúdo fictícios; **não deve ser interpretado como pesquisa factual real**.
 
-Para Brave Search:
+## Pesquisa real
+
+Para habilitar busca web via Brave Search:
 
 ```env
 SEARCH_PROVIDER=brave
 BRAVE_SEARCH_API_KEY=...
 ```
 
-A camada LLM está abstraída no domínio e pronta para endpoint OpenAI-compatible. O MVP deliberadamente usa o provedor determinístico demo até que prompts/evals para um modelo de produção sejam aprovados.
+Para habilitar análise por qualquer endpoint compatível com Chat Completions da OpenAI:
 
-## Fluxo editorial pela API
+```env
+LLM_BASE_URL=https://seu-endpoint.example/v1
+LLM_API_KEY=...
+LLM_MODEL=seu-modelo
+```
+
+O LLM recebe apenas as fontes recuperadas e devolve índices dessas fontes; URLs inventadas pelo modelo não entram no `Evidence Store`. Cada execução registra `provider`, modelo, versão do prompt e hashes de entrada/saída em `ModelRun`.
+
+## Fluxo editorial
 
 1. `POST /api/v1/admin/claims`
 2. `POST /api/v1/admin/claims/{id}/research`
@@ -54,7 +65,7 @@ A camada LLM está abstraída no domínio e pronta para endpoint OpenAI-compatib
 4. `POST /api/v1/admin/claims/{id}/publish`
 5. `POST /api/v1/admin/claims/{id}/corrections` quando necessário
 
-Endpoints admin exigem `X-Admin-Key`.
+O painel `/admin` executa criação, pesquisa, aprovação/rejeição e publicação. Endpoints admin exigem `X-Admin-Key`.
 
 ## Regras de publicação
 
@@ -99,6 +110,6 @@ npm run build
 - `docs/superpowers/specs/2026-08-10-clareza-design.md`
 - `docs/superpowers/plans/2026-08-10-clareza-mvp.md`
 
-## Produção
+## Gates antes de uso eleitoral real
 
-Antes de lançar para as eleições reais, ainda são gates operacionais obrigatórios: provedor LLM validado por evals, corpus/conectores de fontes públicas brasileiras, autenticação editorial OIDC/RBAC, observabilidade, backups/PITR, revisão jurídica eleitoral e política editorial pública completa.
+O MVP já executa o fluxo funcional, mas uma operação eleitoral real ainda exige: corpus/conectores estruturados de fontes públicas brasileiras, evals editoriais do modelo escolhido, autenticação OIDC/RBAC para editores, observabilidade, backups/PITR, revisão jurídica eleitoral e política editorial pública completa.
