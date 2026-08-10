@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: {POSTGRES_DB: clareza, POSTGRES_USER: clareza, POSTGRES_PASSWORD: clareza}
+    volumes: [clareza_pg:/var/lib/postgresql/data]
+    healthcheck: {test: ["CMD-SHELL","pg_isready -U clareza"], interval: 5s, timeout: 5s, retries: 10}
+  redis:
+    image: redis:7-alpine
+    healthcheck: {test: ["CMD","redis-cli","ping"], interval: 5s, timeout: 3s, retries: 10}
+  api:
+    build: ./services/api
+    env_file: .env
+    ports: ["8000:8000"]
+    depends_on: {postgres: {condition: service_healthy}, redis: {condition: service_healthy}}
+  worker:
+    build: {context: ., dockerfile: workers/research/Dockerfile}
+    env_file: .env
+    depends_on: {postgres: {condition: service_healthy}, redis: {condition: service_healthy}}
+  web:
+    build:
+      context: ./apps/web
+      args: {NEXT_PUBLIC_API_URL: "${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}"}
+    ports: ["3000:3000"]
+    depends_on: [api]
+volumes: {clareza_pg: {}}
