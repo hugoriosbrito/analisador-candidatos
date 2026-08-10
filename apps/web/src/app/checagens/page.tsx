@@ -1,0 +1,1 @@
+import {getJson} from "@/lib/api";import {ClaimCard} from "@/components/ClaimCard";export default async function Page(){const claims=await getJson<any[]>("/claims");return <main><div className="shell"><div className="eyebrow">Arquivo público</div><h1>Checagens</h1><div className="grid">{claims.map(c=><ClaimCard c={c} key={c.id}/>)}</div></div></main>}
