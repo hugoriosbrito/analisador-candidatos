@@ -1,10 +1,35 @@
-.env
+```
+# Python
 __pycache__/
-.pytest_cache/
-.ruff_cache/
 *.pyc
-*.db
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+env/
+venv/
+.venv/
+.env
+.env.local
+.env.*
+
+# Node.js
 node_modules/
-.next/
-coverage/
+package-lock.json
+
+# Build artifacts
+dist/
+build/
+target/
+
+# Logs
+*.log
+
+# Editors
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+Thumbs.db
+```
